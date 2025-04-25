@@ -5,5 +5,6 @@ config();
 export const PORT = process.env.PORT || 5500;
 
 export const {
-    SERVER_URL
+    SERVER_URL,
+    DB_URI
 } = process.env;
