@@ -3,8 +3,8 @@ import { createService, getAllServices } from '../controllers/service.controller
 
 const serviceRouter = Router();
 
-serviceRouter.get('/', getAllServices);
+serviceRouter.get('/all-services', getAllServices);
 
-serviceRouter.post('/', createService);
+serviceRouter.post('/create-service', createService);
 
 export default serviceRouter;
