@@ -6,5 +6,6 @@ export const PORT = process.env.PORT || 5500;
 
 export const {
     SERVER_URL,
-    DB_URI
+    DB_URI,
+    JWT_SECRET
 } = process.env;
