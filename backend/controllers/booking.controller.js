@@ -20,11 +20,13 @@ export const createBooking = async (req, res) => {
             });
         }
 
-        const existingBooking = await Booking.findOne({ date, time });
+        const fullDate = new Date(`${date}T${time}`);
+
+        const existingBooking = await Booking.findOne({ date: fullDate });
         if (existingBooking) {
             return res.status(400).json({
                 success: false,
-                message: 'This time slot is already booked. Please choose another time.',
+                message: 'This time slot is already booked.',
             });
         }
 
