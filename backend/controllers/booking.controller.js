@@ -29,6 +29,7 @@ export const createBooking = async (req, res) => {
         }
 
         const booking = new Booking({
+            userId: req.user._id,
             userName,
             phone,
             serviceId,
@@ -68,6 +69,24 @@ export const getAllBookings = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'An error occurred while fetching the bookings.',
+        });
+    }
+};
+
+export const getMyBookings = async (req, res) => {
+    try {
+        const bookings = await Booking.find({ userId: req.user._id }).populate('serviceId');
+
+        res.status(200).json({
+            success: true,
+            message: 'User bookings fetched successfully.',
+            data: bookings,
+        });
+    } catch (error) {
+        console.error('Error fetching user bookings:', error);
+        res.status(500).json({
+            success: false,
+            message: 'An error occurred while fetching bookings.',
         });
     }
 };
