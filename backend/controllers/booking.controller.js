@@ -33,7 +33,7 @@ export const createBooking = async (req, res) => {
             userName,
             phone,
             serviceId,
-            date,
+            date: fullDate,
             time,
         });
 
@@ -87,6 +87,53 @@ export const getMyBookings = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'An error occurred while fetching bookings.',
+        });
+    }
+};
+
+export const updateBookingStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+
+        const allowedStatuses = ['завършена', 'отменена'];
+
+        if (!allowedStatuses.includes(status)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid status. Allowed: "завършена", "отменена".',
+            });
+        }
+
+        const booking = await Booking.findById(id);
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Booking not found.',
+            });
+        }
+
+        if (booking.status !== 'потвърдена') {
+            return res.status(400).json({
+                success: false,
+                message: 'Only bookings with status "потвърдена" can be updated.',
+            });
+        }
+
+        booking.status = status;
+        await booking.save();
+
+        res.status(200).json({
+            success: true,
+            message: `Booking status updated to "${status}".`,
+            data: booking,
+        });
+
+    } catch (error) {
+        console.error('Error updating booking status:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Server error while updating booking status.',
         });
     }
 };
