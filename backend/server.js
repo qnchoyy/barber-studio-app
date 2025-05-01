@@ -7,8 +7,10 @@ import connectToDB from './config/db.js';
 import serviceRouter from './routes/service.routes.js';
 import bookingRouter from './routes/booking.routes.js';
 import authRouter from './routes/auth.routes.js';
+import { autoCompleteBookings } from './jobs/autoCompleteBookings.job.js';
 
 connectToDB();
+autoCompleteBookings();
 
 const app = express();
 
