@@ -139,3 +139,31 @@ export const updateBookingStatus = async (req, res) => {
         });
     }
 };
+
+export const getBookingById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const booking = await Booking.findById(id).populate('serviceId', 'name price duration');
+
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Booking not found.',
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Booking fetched successfully.',
+            data: booking,
+        });
+
+    } catch (error) {
+        console.error('Error fetching booking by ID:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Server error while fetching booking.',
+        });
+    }
+};
