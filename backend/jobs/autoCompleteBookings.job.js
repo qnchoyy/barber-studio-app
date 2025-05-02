@@ -2,11 +2,11 @@ import cron from 'node-cron';
 import Booking from '../models/Booking.model.js';
 
 export const autoCompleteBookings = () => {
-    cron.schedule('* * * * *', async () => {
+    cron.schedule('0 * * * *', async () => {
         try {
             const now = new Date();
 
-            const bookings = await Booking.find({ status: 'потвърдена' });
+            const bookings = await Booking.find({ status: 'потвърдена' }).lean();
 
             let updatedCount = 0;
 
