@@ -50,3 +50,36 @@ export const createService = async (req, res) => {
         });
     }
 };
+
+export const updateService = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, price, duration } = req.body;
+
+        const service = await Service.findById(id);
+        if (!service) {
+            return res.status(404).json({
+                success: false,
+                message: 'Service not found.',
+            });
+        }
+
+        if (name) service.name = name;
+        if (price) service.price = price;
+        if (duration) service.duration = duration;
+
+        await service.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Service updated successfully.',
+            data: service,
+        });
+    } catch (error) {
+        console.error('Error updating service:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Server error while updating service.',
+        });
+    }
+};
