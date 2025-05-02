@@ -167,3 +167,30 @@ export const getBookingById = async (req, res) => {
         });
     }
 };
+
+export const deleteBooking = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const booking = await Booking.findByIdAndDelete(id);
+
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Booking not found.',
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Booking deleted successfully.',
+            data: booking,
+        });
+    } catch (error) {
+        console.error('Error deleting booking:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Server error while deleting booking.',
+        });
+    }
+};
