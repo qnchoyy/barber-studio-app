@@ -1,4 +1,5 @@
 import Booking from '../models/Booking.model.js';
+import Schedule from '../models/Schedule.model.js';
 import Service from '../models/Service.model.js';
 
 export const createBooking = async (req, res) => {
@@ -21,7 +22,23 @@ export const createBooking = async (req, res) => {
         }
 
         const fullDate = new Date(`${date}T${time}`);
+        const dayOfWeek = fullDate.toLocaleDateString('bg-BG', { weekday: 'long' });
 
+        const schedule = await Schedule.findOne({ day: dayOfWeek });
+        if (!schedule) {
+            return res.status(400).json({
+                success: false,
+                message: `No working schedule for ${dayOfWeek}.`,
+            });
+        }
+
+        if (!schedule.slots.includes(time)) {
+            return res.status(400).json({
+                success: false,
+                message: `The time ${time} is not available on ${dayOfWeek}.`,
+            });
+        }
+        
         const existingBooking = await Booking.findOne({ date: fullDate });
         if (existingBooking) {
             return res.status(400).json({
@@ -194,3 +211,42 @@ export const deleteBooking = async (req, res) => {
         });
     }
 };
+
+// export const getAvailableSlots = async (req, res) => {
+//     try {
+//       const { date } = req.query;
+  
+//       if (!date) {
+//         return res.status(400).json({
+//           success: false,
+//           message: 'Date query is required (e.g. ?date=2025-05-10)',
+//         });
+//       }
+  
+//       const WORKING_HOURS = [
+//         '10:00', '11:00', '12:00',
+//         '13:00', '14:00', '15:00',
+//         '16:00', '17:00'
+//       ];
+  
+//       const bookings = await Booking.find({ date: new Date(date) });
+  
+//       const bookedTimes = bookings.map(booking => booking.time);
+ 
+//       const availableSlots = WORKING_HOURS.filter(time => !bookedTimes.includes(time));
+  
+//       res.status(200).json({
+//         success: true,
+//         date,
+//         availableSlots,
+//       });
+  
+//     } catch (error) {
+//       console.error('Error fetching available slots:', error.message);
+//       res.status(500).json({
+//         success: false,
+//         message: 'Server error while fetching available slots.',
+//       });
+//     }
+//   };
+  
