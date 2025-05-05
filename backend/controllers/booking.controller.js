@@ -75,6 +75,13 @@ export const createBooking = async (req, res) => {
         });
 
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({
+                success: false,
+                message: 'This time slot is already booked. Please choose another.',
+            });
+        }
+
         console.error('Error creating booking:', error.message);
         res.status(500).json({
             success: false,
