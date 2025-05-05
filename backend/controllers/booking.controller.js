@@ -58,6 +58,15 @@ export const createBooking = async (req, res) => {
 
         await booking.save();
 
+        const result = await sendSMS(
+            phone,
+            `Здравей, ${userName}! Успешно направи резервация за ${service.name} на ${date} в ${time}.`
+        );
+
+        if (!result.success) {
+            console.error('Проблем при изпращане на SMS:', result.error);
+        }
+
         res.status(201).json({
             success: true,
             message: 'Booking created successfully.',
