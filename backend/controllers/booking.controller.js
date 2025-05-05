@@ -1,6 +1,7 @@
 import Booking from '../models/Booking.model.js';
 import Schedule from '../models/Schedule.model.js';
 import Service from '../models/Service.model.js';
+import { sendSMS } from '../utils/sendSMS.js';
 
 export const createBooking = async (req, res) => {
     try {
