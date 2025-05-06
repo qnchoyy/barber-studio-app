@@ -35,6 +35,10 @@ const bookingSchema = new mongoose.Schema(
             enum: ['потвърдена', 'завършена', 'отменена'],
             default: 'потвърдена',
         },
+        reminderSent: {
+            type: Boolean,
+            default: false
+        },
     },
     {
         timestamps: true,
