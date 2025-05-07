@@ -6,16 +6,17 @@ export const autoCompleteBookings = () => {
         try {
             const now = new Date();
 
-            const bookings = await Booking.find({ status: 'потвърдена' }).lean();
+            const bookings = await Booking.find({
+                status: 'потвърдена',
+                date: { $lt: now }
+            });
 
             let updatedCount = 0;
 
             for (let booking of bookings) {
-                if (booking.date < now) {
-                    booking.status = 'завършена';
-                    await booking.save();
-                    updatedCount++;
-                }
+                booking.status = 'завършена';
+                await booking.save();
+                updatedCount++;
             }
 
             if (updatedCount > 0) {
