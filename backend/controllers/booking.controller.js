@@ -1,102 +1,119 @@
+import dayjs from 'dayjs';
+import mongoose from 'mongoose';
+
 import Booking from '../models/Booking.model.js';
 import Schedule from '../models/Schedule.model.js';
 import Service from '../models/Service.model.js';
+
 import { sendSMS } from '../utils/sendSMS.js';
 
 export const createBooking = async (req, res) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
         const { userName, phone, serviceId, date, time } = req.body;
-
         if (!userName || !phone || !serviceId || !date || !time) {
-            return res.status(400).json({
-                success: false,
-                message: 'All fields are required.',
-            });
-        }
 
-        const service = await Service.findById(serviceId);
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ success: false, message: 'All fields are required.' });
+        }
+        const service = await Service.findById(serviceId).session(session);
         if (!service) {
-            return res.status(404).json({
-                success: false,
-                message: 'Service not found.',
-            });
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(404).json({ success: false, message: 'Service not found.' });
         }
-
         const fullDate = new Date(`${date}T${time}`);
         const dayOfWeek = fullDate.toLocaleDateString('bg-BG', { weekday: 'long' });
+        const schedule = await Schedule.findOne({ day: dayOfWeek }).session(session);
 
-        const schedule = await Schedule.findOne({ day: dayOfWeek });
-        if (!schedule) {
-            return res.status(400).json({
-                success: false,
-                message: `No working schedule for ${dayOfWeek}.`,
-            });
+        if (!schedule || !schedule.slots.includes(time)) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({ success: false, message: `The time ${time} is not available on ${dayOfWeek}.` });
         }
 
-        if (!schedule.slots.includes(time)) {
-            return res.status(400).json({
-                success: false,
-                message: `The time ${time} is not available on ${dayOfWeek}.`,
-            });
+        const bookingStart = dayjs(fullDate);
+        const bookingEnd = bookingStart.add(service.duration, 'minute');
+
+        const sameDayStart = bookingStart.startOf('day').toDate();
+        const sameDayEnd = bookingStart.endOf('day').toDate();
+
+        const bookingsForDay = await Booking.find({
+            date: { $gte: sameDayStart, $lte: sameDayEnd },
+            status: { $ne: 'отменена' }
+        }).populate('serviceId').session(session);
+
+        for (let existing of bookingsForDay) {
+            const existingStart = dayjs(existing.date);
+            const existingEnd = existingStart.add(existing.serviceId.duration, 'minute');
+            const overlap = bookingStart.isBefore(existingEnd) && bookingEnd.isAfter(existingStart);
+            if (overlap) {
+                await session.abortTransaction();
+                session.endSession();
+                return res.status(400).json({ success: false, message: 'This time overlaps with another booking.' });
+            }
         }
+        const [booking] = await Booking.create([
+            {
+                userId: req.user._id,
+                userName,
+                phone,
+                serviceId,
+                date: fullDate,
+                time,
+            }
+        ], { session });
 
-        const existingBooking = await Booking.findOne({ date: fullDate });
-        if (existingBooking) {
-            return res.status(400).json({
-                success: false,
-                message: 'This time slot is already booked.',
-            });
-        }
-
-        const booking = new Booking({
-            userId: req.user._id,
-            userName,
-            phone,
-            serviceId,
-            date: fullDate,
-            time,
-        });
-
-        await booking.save();
+        await session.commitTransaction();
+        session.endSession();
 
         const result = await sendSMS(
             phone,
             `Здравей, ${userName}! Успешно направи резервация за ${service.name} на ${date} в ${time}.`
         );
-
         if (!result.success) {
-            console.error('Проблем при изпращане на SMS:', result.error);
+            console.error('SMS error:', result.error);
         }
 
-        res.status(201).json({
-            success: true,
-            message: 'Booking created successfully.',
-            data: booking,
-        });
-
+        return res.status(201).json({ success: true, message: 'Booking created successfully.', data: booking });
     } catch (error) {
-        if (error.code === 11000) {
-            return res.status(400).json({
-                success: false,
-                message: 'This time slot is already booked. Please choose another.',
-            });
-        }
-
-        console.error('Error creating booking:', error.message);
-        res.status(500).json({
-            success: false,
-            message: 'An error occurred while creating the booking.',
-        });
+        await session.abortTransaction();
+        session.endSession();
+        console.error('Error creating booking with transaction:', error);
+        return res.status(500).json({ success: false, message: 'An error occurred while creating the booking.' });
     }
 };
 
 export const getAllBookings = async (req, res) => {
     try {
-        const bookings = await Booking.find().populate('serviceId', 'name price duration');
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const statusFilter = req.query.status;
+        const sortOrder = req.query.sort === 'asc' ? 1 : -1;
+
+        const query = {};
+        if (statusFilter) {
+            query.status = statusFilter;
+        }
+
+        const total = await Booking.countDocuments(query);
+        const pages = Math.ceil(total / limit);
+
+        const bookings = await Booking.find(query)
+            .sort({ date: sortOrder })
+            .skip(skip)
+            .limit(limit)
+            .populate('serviceId', 'name price duration');
 
         res.status(200).json({
             success: true,
-            message: 'Bookings fetched successfully.',
+            currentPage: page,
+            totalPages: pages,
+            totalBookings: total,
             data: bookings,
         });
 
@@ -254,10 +271,25 @@ export const getAvailableSlots = async (req, res) => {
             });
         }
 
-        const bookings = await Booking.find({ date: bookingDate });
-        const bookedTimes = bookings.map(b => b.time);
+        const bookings = await Booking.find({ date: bookingDate }).populate('serviceId');
+        const unavailableSlots = new Set();
 
-        const availableSlots = schedule.slots.filter(slot => !bookedTimes.includes(slot));
+        for (let booking of bookings) {
+            const bookingStart = dayjs(booking.date);
+            const bookingEnd = bookingStart.add(booking.serviceId.duration, 'minute');
+
+            for (let slot of schedule.slots) {
+                const slotTime = dayjs(`${date}T${slot}`);
+                if (
+                    slotTime.isBefore(bookingEnd) &&
+                    slotTime.add(1, 'minute').isAfter(bookingStart)
+                ) {
+                    unavailableSlots.add(slot);
+                }
+            }
+        }
+
+        const availableSlots = schedule.slots.filter(slot => !unavailableSlots.has(slot));
 
         res.status(200).json({
             success: true,
