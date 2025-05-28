@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSetRecoilState } from "recoil";
 import { authAtom } from "../recoil/authAtom";
-import { FiUser, FiMail, FiLock, FiUserPlus } from "react-icons/fi";
+import { FiUser, FiMail, FiPhone, FiLock, FiUserPlus } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../api/axios";
 
@@ -12,6 +12,7 @@ export default function Register() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -28,17 +29,39 @@ export default function Register() {
 
   const validate = () => {
     const errs = {};
-    if (!formData.name.trim()) errs.name = "Името е задължително";
-    else if (formData.name.trim().length < 4)
-      errs.name = "Името трябва да е поне 4 символа";
-    if (!formData.email.trim()) errs.email = "Имейлът е задължителен";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
+
+    if (!formData.name.trim()) {
+      errs.name = "Името е задължително";
+    } else if (formData.name.trim().length < 2) {
+      errs.name = "Името трябва да е поне 2 символа";
+    }
+
+    if (!formData.email.trim()) {
+      errs.email = "Имейлът е задължителен";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       errs.email = "Невалиден имейл адрес";
-    if (!formData.password) errs.password = "Паролата е задължителна";
-    else if (formData.password.length < 6)
+    }
+
+    if (!formData.phone.trim()) {
+      errs.phone = "Телефонният номер е задължителен";
+    } else {
+      const phoneRegex = /^(\+359|0)[0-9]{8,9}$/;
+      const cleanPhone = formData.phone.replace(/\s/g, "");
+      if (!phoneRegex.test(cleanPhone)) {
+        errs.phone = "Невалиден телефонен номер (напр. 0888123456)";
+      }
+    }
+
+    if (!formData.password) {
+      errs.password = "Паролата е задължителна";
+    } else if (formData.password.length < 6) {
       errs.password = "Паролата трябва да бъде поне 6 символа";
-    if (formData.password !== formData.confirmPassword)
+    }
+
+    if (formData.password !== formData.confirmPassword) {
       errs.confirmPassword = "Паролите не съвпадат";
+    }
+
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -59,6 +82,7 @@ export default function Register() {
       const res = await api.post("/api/auth/register", {
         name: formData.name,
         email: formData.email,
+        phone: formData.phone.replace(/\s/g, ""),
         password: formData.password,
       });
 
@@ -110,7 +134,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-6 pt-20">
       <div className="w-full max-w-md bg-gray-800 p-8 rounded-xl shadow-lg space-y-6">
         <h2 className="text-3xl font-extrabold text-white text-center">
           Регистрация
@@ -145,6 +169,7 @@ export default function Register() {
               </p>
             )}
           </div>
+
           <div>
             <label htmlFor="email" className="sr-only">
               Имейл адрес
@@ -175,6 +200,36 @@ export default function Register() {
             )}
           </div>
           <div>
+            <label htmlFor="phone" className="sr-only">
+              Телефонен номер
+            </label>
+            <div className="relative">
+              <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                autoComplete="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="Телефонен номер "
+                disabled={loading}
+                className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                  errors.phone
+                    ? "border-2 border-red-500"
+                    : "border border-gray-600"
+                }`}
+              />
+            </div>
+            {errors.phone && (
+              <p className="mt-1 text-sm text-red-400 flex items-center">
+                <span className="mr-1">⚠️</span>
+                {errors.phone}
+              </p>
+            )}
+          </div>
+
+          <div>
             <label htmlFor="password" className="sr-only">
               Парола
             </label>
@@ -203,6 +258,7 @@ export default function Register() {
               </p>
             )}
           </div>
+
           <div>
             <label htmlFor="confirmPassword" className="sr-only">
               Потвърдете паролата
@@ -232,6 +288,7 @@ export default function Register() {
               </p>
             )}
           </div>
+
           <button
             type="submit"
             disabled={loading}
