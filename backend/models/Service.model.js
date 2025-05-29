@@ -4,7 +4,7 @@ const serviceSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            enum: ['Подстригване', 'Бръснене', 'Оформяне на брада', 'Пакет: Подстригване + Бръснене'],
+            enum: ['Подстригване', 'Оформяне на брада', 'Пакет: Подстригване + Бръснене'],
             required: [true, 'Service name is required'],
             trim: true
         },
