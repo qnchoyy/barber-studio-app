@@ -8,8 +8,8 @@ const scheduleRouter = Router();
 
 scheduleRouter.post('/create', protect, adminOnly, createSchedule);
 scheduleRouter.patch('/update/:day', protect, adminOnly, updateSchedule);
-scheduleRouter.get('/day/:day', protect, adminOnly, getScheduleByDay);
-scheduleRouter.get('/all', protect, adminOnly, getAllSchedules);
+scheduleRouter.get('/day/:day', protect, getScheduleByDay);
+scheduleRouter.get('/all', protect, getAllSchedules);
 scheduleRouter.delete('/delete/:day', protect, adminOnly, deleteScheduleByDay);
 
 export default scheduleRouter;
