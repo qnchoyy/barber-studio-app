@@ -1,4 +1,5 @@
 import User from '../models/User.model.js';
+import { formatToE164, validateBulgarianPhone } from '../utils/phoneUtils.js';
 
 export const getUserProfile = async (req, res) => {
     try {
@@ -24,7 +25,31 @@ export const updateUserProfile = async (req, res) => {
         }
 
         if (name) user.name = name;
-        if (phone) user.phone = phone;
+
+        if (phone) {
+            if (!validateBulgarianPhone(phone)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Невалиден телефонен номер. Използвайте формат: 0888123456',
+                });
+            }
+
+            const normalizedPhone = formatToE164(phone);
+
+            const existingUser = await User.findOne({
+                phone: normalizedPhone,
+                _id: { $ne: req.user._id }
+            });
+
+            if (existingUser) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Потребител с този телефонен номер вече съществува.',
+                });
+            }
+
+            user.phone = normalizedPhone;
+        }
 
         await user.save();
 
