@@ -271,7 +271,14 @@ export const getAvailableSlots = async (req, res) => {
             });
         }
 
-        const bookings = await Booking.find({ date: bookingDate }).populate('serviceId');
+        const sameDayStart = dayjs(bookingDate).startOf('day').toDate();
+        const sameDayEnd = dayjs(bookingDate).endOf('day').toDate();
+
+        const bookings = await Booking.find({
+            date: { $gte: sameDayStart, $lte: sameDayEnd },
+            status: { $ne: 'отменена' }
+        }).populate('serviceId');
+
         const unavailableSlots = new Set();
 
         for (let booking of bookings) {
