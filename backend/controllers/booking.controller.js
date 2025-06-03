@@ -6,6 +6,7 @@ import Schedule from '../models/Schedule.model.js';
 import Service from '../models/Service.model.js';
 
 import { sendSMS } from '../utils/sendSMS.js';
+import { formatToE164, validateBulgarianPhone } from '../utils/phoneUtils.js';
 
 export const createBooking = async (req, res) => {
     const session = await mongoose.startSession();
@@ -13,17 +14,29 @@ export const createBooking = async (req, res) => {
     try {
         const { userName, phone, serviceId, date, time } = req.body;
         if (!userName || !phone || !serviceId || !date || !time) {
-
             await session.abortTransaction();
             session.endSession();
             return res.status(400).json({ success: false, message: 'All fields are required.' });
         }
+
+        if (!validateBulgarianPhone(phone)) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(400).json({
+                success: false,
+                message: 'Невалиден телефонен номер. Използвайте формат: 0888123456'
+            });
+        }
+
+        const normalizedPhone = formatToE164(phone);
+
         const service = await Service.findById(serviceId).session(session);
         if (!service) {
             await session.abortTransaction();
             session.endSession();
             return res.status(404).json({ success: false, message: 'Service not found.' });
         }
+
         const fullDate = new Date(`${date}T${time}`);
         const dayOfWeek = fullDate.toLocaleDateString('bg-BG', { weekday: 'long' });
         const schedule = await Schedule.findOne({ day: dayOfWeek }).session(session);
@@ -55,11 +68,12 @@ export const createBooking = async (req, res) => {
                 return res.status(400).json({ success: false, message: 'This time overlaps with another booking.' });
             }
         }
+
         const [booking] = await Booking.create([
             {
                 userId: req.user._id,
                 userName,
-                phone,
+                phone: normalizedPhone,
                 serviceId,
                 date: fullDate,
                 time,
@@ -70,7 +84,7 @@ export const createBooking = async (req, res) => {
         session.endSession();
 
         const result = await sendSMS(
-            phone,
+            normalizedPhone,
             `Здравей, ${userName}! Успешно направи резервация за ${service.name} на ${date} в ${time}.`
         );
         if (!result.success) {
