@@ -1,6 +1,7 @@
 import User from '../models/User.model.js';
 import jwt from 'jsonwebtoken';
 import { JWT_SECRET } from '../config/env.js';
+import { formatToE164, validateBulgarianPhone } from '../utils/phoneUtils.js';
 
 const generateToken = (userId) => {
     return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '7d' });
@@ -17,8 +18,20 @@ export const register = async (req, res) => {
             });
         }
 
+        if (!validateBulgarianPhone(phone)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Невалиден телефонен номер. Използвайте формат: 0888123456',
+            });
+        }
+
+        const normalizedPhone = formatToE164(phone);
+
         const existingUser = await User.findOne({
-            $or: [{ email }, { phone }]
+            $or: [
+                { email },
+                { phone: normalizedPhone }
+            ]
         });
 
         if (existingUser) {
@@ -28,7 +41,7 @@ export const register = async (req, res) => {
                     message: 'User with this email already exists.',
                 });
             }
-            if (existingUser.phone === phone) {
+            if (existingUser.phone === normalizedPhone) {
                 return res.status(400).json({
                     success: false,
                     message: 'User with this phone number already exists.',
@@ -36,7 +49,12 @@ export const register = async (req, res) => {
             }
         }
 
-        const user = await User.create({ name, email, password, phone });
+        const user = await User.create({
+            name,
+            email,
+            password,
+            phone: normalizedPhone
+        });
 
         const token = generateToken(user._id);
 
