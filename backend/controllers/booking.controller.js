@@ -262,14 +262,31 @@ export const deleteBooking = async (req, res) => {
 
 export const getAvailableSlots = async (req, res) => {
     try {
-        const { date } = req.query;
+        const { date, serviceId } = req.query;
 
         if (!date) {
             return res.status(400).json({
                 success: false,
-                message: 'Date query is required (e.g. ?date=2025-05-10)',
+                message: 'Date query is required (e.g. ?date=2025-06-04)',
             });
         }
+
+        if (!serviceId) {
+            return res.status(400).json({
+                success: false,
+                message: 'Service ID is required',
+            });
+        }
+
+        const service = await Service.findById(serviceId);
+        if (!service) {
+            return res.status(404).json({
+                success: false,
+                message: 'Service not found',
+            });
+        }
+
+        const serviceDuration = service.duration;
 
         const bookingDate = new Date(date);
         const dayName = bookingDate.toLocaleDateString('bg-BG', { weekday: 'long' });
@@ -293,30 +310,43 @@ export const getAvailableSlots = async (req, res) => {
             status: { $ne: 'отменена' }
         }).populate('serviceId');
 
-        const unavailableSlots = new Set();
+        const availableSlots = [];
 
-        for (let booking of bookings) {
-            const bookingStart = dayjs(booking.date);
-            const bookingEnd = bookingStart.add(booking.serviceId.duration, 'minute');
+        for (const slot of schedule.slots) {
+            const proposedStart = dayjs(`${date}T${slot}`);
+            const proposedEnd = proposedStart.add(serviceDuration, 'minute');
 
-            for (let slot of schedule.slots) {
-                const slotTime = dayjs(`${date}T${slot}`);
-                if (
-                    slotTime.isBefore(bookingEnd) &&
-                    slotTime.add(1, 'minute').isAfter(bookingStart)
-                ) {
-                    unavailableSlots.add(slot);
+            const lastSlot = schedule.slots[schedule.slots.length - 1];
+            const workEnd = dayjs(`${date}T${lastSlot}`).add(60, 'minute');
+
+            if (proposedEnd.isAfter(workEnd)) {
+                continue;
+            }
+
+            let hasConflict = false;
+
+            for (const booking of bookings) {
+                const bookingStart = dayjs(booking.date);
+                const bookingEnd = bookingStart.add(booking.serviceId.duration, 'minute');
+
+                if (proposedStart.isBefore(bookingEnd) && proposedEnd.isAfter(bookingStart)) {
+                    hasConflict = true;
+                    break;
                 }
             }
-        }
 
-        const availableSlots = schedule.slots.filter(slot => !unavailableSlots.has(slot));
+            if (!hasConflict) {
+                availableSlots.push(slot);
+            }
+        }
 
         res.status(200).json({
             success: true,
             date,
             weekday: dayName,
             availableSlots,
+            serviceDuration,
+            algorithm: 'intelligent-overlap-check'
         });
 
     } catch (error) {
