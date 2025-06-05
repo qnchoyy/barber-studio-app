@@ -357,3 +357,76 @@ export const getAvailableSlots = async (req, res) => {
         });
     }
 };
+
+export const cancelMyBooking = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user._id;
+
+        const booking = await Booking.findById(id);
+
+        if (!booking) {
+            return res.status(404).json({
+                success: false,
+                message: 'Резервацията не е намерена.',
+            });
+        }
+
+        if (booking.userId.toString() !== userId.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: 'Нямате права да отмените тази резервация.',
+            });
+        }
+
+        if (booking.status !== 'потвърдена') {
+            return res.status(400).json({
+                success: false,
+                message: `Не можете да отмените резервация със статус "${booking.status}".`,
+            });
+        }
+
+        const bookingDateTime = new Date(booking.date);
+        const now = new Date();
+        const timeDifference = bookingDateTime - now;
+        const twoHoursInMs = 2 * 60 * 60 * 1000;
+
+        if (timeDifference < twoHoursInMs && timeDifference > 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Не можете да отмените резервация по-малко от 2 часа преди часа.',
+            });
+        }
+
+        if (timeDifference < 0) {
+            return res.status(400).json({
+                success: false,
+                message: 'Не можете да отмените резервация която вече е минала.',
+            });
+        }
+
+        booking.status = 'отменена';
+        await booking.save();
+
+        const cancelSMS = `Здравей, ${booking.userName}! Вашата резервация за ${booking.date.toLocaleDateString('bg-BG')} в ${booking.time} е отменена успешно.`;
+
+        try {
+            await sendSMS(booking.phone, cancelSMS);
+        } catch (smsError) {
+            console.error('SMS error during cancellation:', smsError.message);
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Резервацията е отменена успешно.',
+            data: booking,
+        });
+
+    } catch (error) {
+        console.error('Error cancelling booking:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Възникна грешка при отмяна на резервацията.',
+        });
+    }
+};
