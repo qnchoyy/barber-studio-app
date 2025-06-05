@@ -17,7 +17,6 @@ import api from "../../api/axios";
 const BookingModal = ({ isOpen, onClose, selectedService }) => {
   const auth = useRecoilValue(authAtom);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
   const [availableSlots, setAvailableSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
@@ -73,11 +72,9 @@ const BookingModal = ({ isOpen, onClose, selectedService }) => {
           if (date !== today) {
             return true;
           }
-
           const [hour, minute] = slot.split(":");
           const slotDateTime = new Date(date);
           slotDateTime.setHours(+hour, +minute, 0, 0);
-
           return slotDateTime > now;
         });
 
@@ -163,7 +160,7 @@ const BookingModal = ({ isOpen, onClose, selectedService }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!validate()) {
@@ -260,7 +257,6 @@ const BookingModal = ({ isOpen, onClose, selectedService }) => {
                 type="text"
                 value={formData.userName}
                 onChange={handleChange}
-                disabled={loading}
                 className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                   errors.userName
                     ? "border-2 border-red-500"
@@ -292,7 +288,6 @@ const BookingModal = ({ isOpen, onClose, selectedService }) => {
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
-                disabled={loading}
                 className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
                   errors.phone
                     ? "border-2 border-red-500"
@@ -324,7 +319,6 @@ const BookingModal = ({ isOpen, onClose, selectedService }) => {
                 type="date"
                 value={formData.date}
                 onChange={handleChange}
-                disabled={loading}
                 min={getMinDate()}
                 max={getMaxDate()}
                 className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
@@ -420,11 +414,9 @@ const BookingModal = ({ isOpen, onClose, selectedService }) => {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={
-                loading || !formData.date || !formData.time || loadingSlots
-              }
+              disabled={!formData.date || !formData.time || loadingSlots}
               className={`flex-2 flex items-center justify-center py-3 px-6 rounded-lg text-white font-semibold transition-all duration-300 ${
-                loading || !formData.date || !formData.time || loadingSlots
+                !formData.date || !formData.time || loadingSlots
                   ? "bg-gray-600 cursor-not-allowed"
                   : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg"
               }`}
