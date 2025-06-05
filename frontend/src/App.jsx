@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 import Services from "./pages/Services";
+import BookingConfirmation from "./pages/BookingConfirmation";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/services" element={<Services />} />
+        <Route path="/booking-confirmation" element={<BookingConfirmation />} />
       </Routes>
     </>
   );
