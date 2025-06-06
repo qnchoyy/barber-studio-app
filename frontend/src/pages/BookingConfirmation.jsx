@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   FiCalendar,
@@ -19,6 +19,11 @@ const BookingConfirmation = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+
+    document.activeElement?.blur();
+  }, []);
   const { bookingData } = location.state || {};
 
   if (!bookingData) {
@@ -46,15 +51,15 @@ const BookingConfirmation = () => {
           duration: 5000,
         });
 
-        navigate("/services");
+        navigate("/bookings?filter=потвърдена");
 
         setTimeout(() => {
-          toast("📱 SMS потвърждение е изпратено!", {
+          toast("📱 Очаквайте SMS потвърждение!", {
             duration: 4000,
             style: {
-              background: "#065f46",
-              color: "#d1fae5",
-              border: "1px solid #10b981",
+              background: "#1e40af",
+              color: "#dbeafe",
+              border: "1px solid #3b82f6",
             },
           });
         }, 1000);
@@ -263,7 +268,7 @@ const BookingConfirmation = () => {
 
                 <button
                   onClick={() => navigate(-1)}
-                  className="w-full py-3 px-6 border border-gray-600 text-gray-300 rounded-xl hover:bg-gray-700/30 transition-all duration-300"
+                  className="w-full py-3 px-6 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white rounded-xl transition-all duration-300 border border-gray-500/50 hover:border-gray-400/70 hover:scale-[1.02]"
                 >
                   <div className="flex items-center justify-center">
                     <FiArrowLeft className="w-4 h-4 mr-2" />
