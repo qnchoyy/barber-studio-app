@@ -12,8 +12,8 @@ import {
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../api/axios";
-import BookingCard from "../components/BookingCard";
-import BookingCancelModal from "../components/BookingCancelModal";
+import BookingCard from "../components/my-bookings/BookingCard";
+import BookingCancelModal from "../components/my-bookings/BookingCancelModal";
 
 const MyBookings = () => {
   const auth = useRecoilValue(authAtom);

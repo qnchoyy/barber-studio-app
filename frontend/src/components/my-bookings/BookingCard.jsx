@@ -13,7 +13,7 @@ import {
   formatBookingDate,
   getTimeUntilBooking,
   canBeCancelled,
-} from "../utils/bookingUtils";
+} from "../../utils/bookingUtils";
 
 const StatusBadge = ({ status }) => {
   const statusConfig = {

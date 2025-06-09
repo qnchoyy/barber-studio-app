@@ -5,7 +5,7 @@ import {
   FiClock,
   FiScissors,
 } from "react-icons/fi";
-import { formatBookingDate, getBookingEndTime } from "../utils/bookingUtils";
+import { formatBookingDate, getBookingEndTime } from "../../utils/bookingUtils";
 
 const BookingCancelModal = ({
   isOpen,
