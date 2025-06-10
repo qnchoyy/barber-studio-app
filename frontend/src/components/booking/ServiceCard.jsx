@@ -1,4 +1,5 @@
 import { FiClock, FiDollarSign, FiCalendar, FiScissors } from "react-icons/fi";
+import Button from "../ui/Button";
 
 const ServiceCard = ({ service, index, onBook }) => {
   const getServiceGradient = (index) => {
@@ -52,17 +53,15 @@ const ServiceCard = ({ service, index, onBook }) => {
           </div>
         </div>
 
-        <button
+        <Button
+          variant="primary"
+          size="large"
+          icon={FiCalendar}
           onClick={() => onBook(service)}
-          className={`w-full group/btn relative overflow-hidden bg-gradient-to-r ${gradientClass} hover:shadow-lg hover:shadow-blue-500/25 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 hover:scale-105`}
+          className="w-full hover:scale-105 transition-transform duration-300"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700"></div>
-
-          <div className="relative flex items-center justify-center space-x-2">
-            <FiCalendar className="w-5 h-5" />
-            <span>Резервирай час</span>
-          </div>
-        </button>
+          Резервирай час
+        </Button>
       </div>
     </div>
   );
