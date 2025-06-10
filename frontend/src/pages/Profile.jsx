@@ -5,6 +5,7 @@ import { FiUser, FiMail, FiPhone, FiSave, FiEdit2 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../api/axios";
 import InputField from "../components/ui/InputField";
+import Button from "../components/ui/Button";
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -183,18 +184,16 @@ export default function Profile() {
               </div>
 
               {!editing && (
-                <button
+                <Button
+                  variant="secondary"
+                  size="medium"
+                  icon={FiEdit2}
                   onClick={() => setEditing(true)}
                   disabled={loading}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                    loading
-                      ? "bg-white/10 text-gray-400 cursor-not-allowed"
-                      : "bg-white/20 hover:bg-white/30 text-white"
-                  }`}
+                  className="bg-white/20 hover:bg-white/30 border-0"
                 >
-                  <FiEdit2 className="w-4 h-4" />
-                  <span>Редактирай</span>
-                </button>
+                  Редактирай
+                </Button>
               )}
             </div>
           </div>
@@ -241,29 +240,25 @@ export default function Profile() {
 
               {editing && (
                 <div className="flex items-center space-x-4 pt-4">
-                  <button
+                  <Button
                     type="submit"
-                    disabled={loading}
-                    className={`flex items-center space-x-2 px-6 py-3 rounded-lg text-white font-medium transition-all duration-200 ${
-                      loading
-                        ? "bg-blue-400 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5"
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    variant="primary"
+                    size="medium"
+                    loading={loading}
+                    icon={FiSave}
                   >
-                    <FiSave
-                      className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
-                    />
-                    <span>{loading ? "Записване..." : "Запази промените"}</span>
-                  </button>
+                    {loading ? "Записване..." : "Запази промените"}
+                  </Button>
 
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="medium"
                     onClick={handleCancel}
                     disabled={loading}
-                    className="px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
                   >
                     Отказ
-                  </button>
+                  </Button>
                 </div>
               )}
             </form>
