@@ -13,6 +13,7 @@ import {
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../api/axios";
+import Button from "../components/ui/Button";
 
 const BookingConfirmation = () => {
   const location = useLocation();
@@ -21,9 +22,9 @@ const BookingConfirmation = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-
     document.activeElement?.blur();
   }, []);
+
   const { bookingData } = location.state || {};
 
   if (!bookingData) {
@@ -244,37 +245,26 @@ const BookingConfirmation = () => {
               </div>
 
               <div className="space-y-3">
-                <button
+                <Button
+                  variant="success"
+                  size="large"
+                  loading={loading}
+                  icon={FiCheck}
                   onClick={handleConfirm}
-                  disabled={loading}
-                  className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 ${
-                    loading
-                      ? "bg-gray-600 cursor-not-allowed text-gray-300"
-                      : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-green-500/25 hover:scale-[1.02]"
-                  }`}
+                  className="w-full"
                 >
-                  {loading ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                      Потвърждаване...
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      <FiCheck className="w-5 h-5 mr-2" />
-                      Потвърди резервацията
-                    </div>
-                  )}
-                </button>
+                  {loading ? "Потвърждаване..." : "Потвърди резервацията"}
+                </Button>
 
-                <button
+                <Button
+                  variant="secondary"
+                  size="medium"
+                  icon={FiArrowLeft}
                   onClick={() => navigate(-1)}
-                  className="w-full py-3 px-6 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white rounded-xl transition-all duration-300 border border-gray-500/50 hover:border-gray-400/70 hover:scale-[1.02]"
+                  className="w-full"
                 >
-                  <div className="flex items-center justify-center">
-                    <FiArrowLeft className="w-4 h-4 mr-2" />
-                    Назад
-                  </div>
-                </button>
+                  Назад
+                </Button>
               </div>
             </div>
           </div>
