@@ -14,6 +14,7 @@ import {
   getTimeUntilBooking,
   canBeCancelled,
 } from "../../utils/bookingUtils";
+import Button from "../ui/Button";
 
 const StatusBadge = ({ status }) => {
   const statusConfig = {
@@ -138,17 +139,17 @@ const BookingCard = ({ booking, onCancelBooking, cancellingId }) => {
         </div>
       </div>
 
-      <div className="border-t border-gray-700/50 pt-4 space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center space-x-3">
-            <FiUser className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-300 text-sm">{booking.userName}</span>
-          </div>
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex items-center space-x-3">
+          <FiUser className="w-4 h-4 text-gray-400" />
+          <span className="text-gray-300 text-sm truncate">
+            {booking.userName}
+          </span>
+        </div>
 
-          <div className="flex items-center space-x-3 justify-end pr-7">
-            <FiPhone className="w-4 h-4 text-gray-400" />
-            <span className="text-gray-300 text-sm">{booking.phone}</span>
-          </div>
+        <div className="flex items-center space-x-3 justify-end">
+          <FiPhone className="w-4 h-4 text-gray-400" />
+          <span className="text-gray-300 text-sm pr-5">{booking.phone}</span>
         </div>
       </div>
 
@@ -180,22 +181,16 @@ const BookingCard = ({ booking, onCancelBooking, cancellingId }) => {
               {getTimeUntilBooking(booking.date)} до часа
             </div>
           </div>
-          <button
+
+          <Button
+            variant="danger"
+            size="large"
+            icon={FiXCircle}
+            loading={cancellingId === booking._id}
             onClick={() => onCancelBooking(booking)}
-            disabled={cancellingId === booking._id}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 ${
-              cancellingId === booking._id
-                ? "bg-red-600/50 cursor-not-allowed text-red-200"
-                : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:scale-105"
-            }`}
           >
-            <div className="flex items-center space-x-2">
-              <FiXCircle className="w-4 h-4" />
-              <span>
-                {cancellingId === booking._id ? "Отменяне..." : "Отмени"}
-              </span>
-            </div>
-          </button>
+            {cancellingId === booking._id ? "Отменяне..." : "Отмени резервация"}
+          </Button>
         </div>
       )}
 
