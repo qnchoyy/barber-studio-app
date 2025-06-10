@@ -6,6 +6,7 @@ import { FiUser, FiMail, FiPhone, FiLock, FiUserPlus } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../api/axios";
 import InputField from "../components/ui/InputField";
+import Button from "../components/ui/Button";
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -207,20 +208,16 @@ export default function Register() {
             disabled={loading}
           />
 
-          <button
+          <Button
             type="submit"
-            disabled={loading}
-            className={`w-full flex items-center justify-center py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 ${
-              loading
-                ? "bg-blue-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5"
-            } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800`}
+            variant="primary"
+            size="large"
+            loading={loading}
+            icon={FiUserPlus}
+            className="w-full"
           >
-            <FiUserPlus
-              className={`mr-2 h-5 w-5 ${loading ? "animate-spin" : ""}`}
-            />
             {loading ? "Създаване на профил..." : "Създай профил"}
-          </button>
+          </Button>
         </form>
 
         <p className="text-center text-gray-400">
