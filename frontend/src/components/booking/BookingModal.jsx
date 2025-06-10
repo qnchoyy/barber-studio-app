@@ -13,6 +13,7 @@ import {
 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../../api/axios";
+import InputField from "../ui/InputField";
 
 const BookingModal = ({ isOpen, onClose, selectedService }) => {
   const auth = useRecoilValue(authAtom);
@@ -242,99 +243,42 @@ const BookingModal = ({ isOpen, onClose, selectedService }) => {
         </div>
 
         <div className="p-6 space-y-6">
-          <div>
-            <label
-              htmlFor="userName"
-              className="block text-sm font-medium text-gray-300 mb-2"
-            >
-              Пълно име
-            </label>
-            <div className="relative">
-              <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                id="userName"
-                name="userName"
-                type="text"
-                value={formData.userName}
-                onChange={handleChange}
-                className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  errors.userName
-                    ? "border-2 border-red-500"
-                    : "border border-gray-600"
-                }`}
-                placeholder="Въведете вашето име"
-              />
-            </div>
-            {errors.userName && (
-              <p className="mt-1 text-sm text-red-400 flex items-center">
-                <span className="mr-1">⚠️</span>
-                {errors.userName}
-              </p>
-            )}
-          </div>
+          <InputField
+            id="userName"
+            name="userName"
+            type="text"
+            label="Пълно име"
+            icon={FiUser}
+            placeholder="Въведете вашето име"
+            value={formData.userName}
+            onChange={handleChange}
+            error={errors.userName}
+          />
 
-          <div>
-            <label
-              htmlFor="phone"
-              className="block text-sm font-medium text-gray-300 mb-2"
-            >
-              Телефонен номер
-            </label>
-            <div className="relative">
-              <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  errors.phone
-                    ? "border-2 border-red-500"
-                    : "border border-gray-600"
-                }`}
-                placeholder="0888 123 456"
-              />
-            </div>
-            {errors.phone && (
-              <p className="mt-1 text-sm text-red-400 flex items-center">
-                <span className="mr-1">⚠️</span>
-                {errors.phone}
-              </p>
-            )}
-          </div>
+          <InputField
+            id="phone"
+            name="phone"
+            type="tel"
+            label="Телефонен номер"
+            icon={FiPhone}
+            placeholder="0888 123 456"
+            value={formData.phone}
+            onChange={handleChange}
+            error={errors.phone}
+          />
 
-          <div>
-            <label
-              htmlFor="date"
-              className="block text-sm font-medium text-gray-300 mb-2"
-            >
-              Изберете дата
-            </label>
-            <div className="relative">
-              <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                id="date"
-                name="date"
-                type="date"
-                value={formData.date}
-                onChange={handleChange}
-                min={getMinDate()}
-                max={getMaxDate()}
-                className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  errors.date
-                    ? "border-2 border-red-500"
-                    : "border border-gray-600"
-                }`}
-              />
-            </div>
-            {errors.date && (
-              <p className="mt-1 text-sm text-red-400 flex items-center">
-                <span className="mr-1">⚠️</span>
-                {errors.date}
-              </p>
-            )}
-          </div>
+          <InputField
+            id="date"
+            name="date"
+            type="date"
+            label="Изберете дата"
+            icon={FiCalendar}
+            value={formData.date}
+            onChange={handleChange}
+            error={errors.date}
+            min={getMinDate()}
+            max={getMaxDate()}
+          />
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
