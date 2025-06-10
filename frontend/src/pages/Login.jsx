@@ -5,6 +5,7 @@ import { authAtom } from "../recoil/authAtom";
 import { FiUser, FiLock, FiLogIn } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../api/axios";
+import InputField from "../components/ui/InputField";
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -105,65 +106,31 @@ export default function Login() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="sr-only">
-              Имейл адрес
-            </label>
-            <div className="relative">
-              <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                value={formData.email}
-                onChange={handleChange}
-                disabled={loading}
-                placeholder="Имейл адрес"
-                className={`w-full pl-10 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  errors.email
-                    ? "border-2 border-red-500"
-                    : "border border-gray-600"
-                }`}
-              />
-            </div>
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-400 flex items-center">
-                <span className="mr-1">⚠️</span>
-                {errors.email}
-              </p>
-            )}
-          </div>
+          <InputField
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            icon={FiUser}
+            placeholder="Имейл адрес"
+            value={formData.email}
+            onChange={handleChange}
+            error={errors.email}
+            disabled={loading}
+          />
 
-          <div>
-            <label htmlFor="password" className="sr-only">
-              Парола
-            </label>
-            <div className="relative">
-              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                value={formData.password}
-                onChange={handleChange}
-                disabled={loading}
-                placeholder="Парола"
-                className={`w-full pl-10 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  errors.password
-                    ? "border-2 border-red-500"
-                    : "border border-gray-600"
-                }`}
-              />
-            </div>
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-400 flex items-center">
-                <span className="mr-1">⚠️</span>
-                {errors.password}
-              </p>
-            )}
-          </div>
+          <InputField
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            icon={FiLock}
+            placeholder="Парола"
+            value={formData.password}
+            onChange={handleChange}
+            error={errors.password}
+            disabled={loading}
+          />
 
           <button
             type="submit"
