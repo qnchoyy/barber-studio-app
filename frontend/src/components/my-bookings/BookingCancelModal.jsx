@@ -6,6 +6,7 @@ import {
   FiScissors,
 } from "react-icons/fi";
 import { formatBookingDate, getBookingEndTime } from "../../utils/bookingUtils";
+import Button from "../ui/Button";
 
 const BookingCancelModal = ({
   isOpen,
@@ -33,13 +34,15 @@ const BookingCancelModal = ({
               Отмяна на резервация
             </h3>
           </div>
-          <button
+
+          <Button
+            variant="ghost"
+            size="medium"
+            icon={FiX}
             onClick={onClose}
             disabled={isLoading}
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <FiX className="w-5 h-5" />
-          </button>
+            className="text-gray-400 hover:text-white hover:bg-gray-700 [&_svg]:!w-7 [&_svg]:!h-7"
+          />
         </div>
 
         <div className="p-6">
@@ -93,31 +96,25 @@ const BookingCancelModal = ({
         </div>
 
         <div className="flex items-center space-x-3 p-6 border-t border-gray-700">
-          <button
+          <Button
+            variant="outline"
+            size="large"
             onClick={onClose}
             disabled={isLoading}
-            className="flex-1 px-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg hover:bg-gray-600 transition-colors"
+            className="flex-1"
           >
             Запази резервацията
-          </button>
-          <button
+          </Button>
+
+          <Button
+            variant="danger"
+            size="large"
+            loading={isLoading}
             onClick={onConfirm}
-            disabled={isLoading}
-            className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all duration-300 ${
-              isLoading
-                ? "bg-red-600/50 cursor-not-allowed text-red-200"
-                : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:scale-[1.02]"
-            }`}
+            className="flex-1"
           >
-            {isLoading ? (
-              <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Отменяне...
-              </div>
-            ) : (
-              "Да, отмени резервацията"
-            )}
-          </button>
+            {isLoading ? "Отменяне..." : "Да, отмени резервацията"}
+          </Button>
         </div>
       </div>
     </div>
