@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRecoilValue } from "recoil";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { authAtom } from "../recoil/authAtom";
 import {
   FiCalendar,
@@ -14,10 +14,12 @@ import toast from "react-hot-toast";
 import api from "../api/axios";
 import BookingCard from "../components/my-bookings/BookingCard";
 import BookingCancelModal from "../components/my-bookings/BookingCancelModal";
+import Button from "../components/ui/Button";
 
 const MyBookings = () => {
   const auth = useRecoilValue(authAtom);
   const location = useLocation();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -164,34 +166,27 @@ const MyBookings = () => {
               },
               { value: "отменена", label: "Отменени", count: counts.отменена },
             ].map((opt) => (
-              <button
+              <Button
                 key={opt.value}
+                variant={filter === opt.value ? "primary" : "ghost"}
+                size="small"
                 onClick={() => setFilter(opt.value)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  filter === opt.value
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-800/50 text-gray-300 hover:bg-gray-700 hover:text-white"
-                }`}
               >
                 {opt.label} ({opt.count})
-              </button>
+              </Button>
             ))}
           </div>
 
-          <button
+          <Button
+            variant="primary"
+            size="medium"
+            icon={FiRefreshCw}
+            iconPosition="left"
+            loading={loading}
             onClick={fetchBookings}
-            disabled={loading}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-              loading
-                ? "bg-gray-600 cursor-not-allowed text-gray-400"
-                : "bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white"
-            }`}
           >
-            <FiRefreshCw
-              className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
-            />
-            <span>Обнови</span>
-          </button>
+            Обнови
+          </Button>
         </div>
 
         {loading && (
@@ -206,12 +201,9 @@ const MyBookings = () => {
             <div className="bg-red-900/30 border border-red-500/50 rounded-2xl p-8 max-w-md mx-auto">
               <FiXCircle className="w-12 h-12 text-red-400 mx-auto mb-4" />
               <p className="text-red-300 text-lg mb-4">{error}</p>
-              <button
-                onClick={fetchBookings}
-                className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-              >
+              <Button variant="danger" size="medium" onClick={fetchBookings}>
                 Опитай отново
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -241,13 +233,14 @@ const MyBookings = () => {
               <p className="text-gray-500 mb-6">
                 Резервирайте час от страницата с услуги
               </p>
-              <a
-                href="/services"
-                className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg transition-all duration-300"
+              <Button
+                variant="primary"
+                size="medium"
+                icon={FiScissors}
+                onClick={() => navigate("/services")}
               >
-                <FiScissors className="w-4 h-4" />
-                <span>Резервирай час</span>
-              </a>
+                Резервирай час
+              </Button>
             </div>
           </div>
         )}
