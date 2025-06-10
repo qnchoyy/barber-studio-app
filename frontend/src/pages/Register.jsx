@@ -5,6 +5,7 @@ import { authAtom } from "../recoil/authAtom";
 import { FiUser, FiMail, FiPhone, FiLock, FiUserPlus } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../api/axios";
+import InputField from "../components/ui/InputField";
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -139,155 +140,72 @@ export default function Register() {
         <h2 className="text-3xl font-extrabold text-white text-center">
           Регистрация
         </h2>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="name" className="sr-only">
-              Пълно име
-            </label>
-            <div className="relative">
-              <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Пълно име"
-                disabled={loading}
-                className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  errors.name
-                    ? "border-2 border-red-500"
-                    : "border border-gray-600"
-                }`}
-              />
-            </div>
-            {errors.name && (
-              <p className="mt-1 text-sm text-red-400 flex items-center">
-                <span className="mr-1">⚠️</span>
-                {errors.name}
-              </p>
-            )}
-          </div>
+          <InputField
+            id="name"
+            name="name"
+            type="text"
+            autoComplete="name"
+            icon={FiUser}
+            placeholder="Пълно име"
+            value={formData.name}
+            onChange={handleChange}
+            error={errors.name}
+            disabled={loading}
+          />
 
-          <div>
-            <label htmlFor="email" className="sr-only">
-              Имейл адрес
-            </label>
-            <div className="relative">
-              <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Имейл адрес"
-                disabled={loading}
-                className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  errors.email
-                    ? "border-2 border-red-500"
-                    : "border border-gray-600"
-                }`}
-              />
-            </div>
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-400 flex items-center">
-                <span className="mr-1">⚠️</span>
-                {errors.email}
-              </p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="phone" className="sr-only">
-              Телефонен номер
-            </label>
-            <div className="relative">
-              <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                autoComplete="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="Телефонен номер "
-                disabled={loading}
-                className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  errors.phone
-                    ? "border-2 border-red-500"
-                    : "border border-gray-600"
-                }`}
-              />
-            </div>
-            {errors.phone && (
-              <p className="mt-1 text-sm text-red-400 flex items-center">
-                <span className="mr-1">⚠️</span>
-                {errors.phone}
-              </p>
-            )}
-          </div>
+          <InputField
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            icon={FiMail}
+            placeholder="Имейл адрес"
+            value={formData.email}
+            onChange={handleChange}
+            error={errors.email}
+            disabled={loading}
+          />
 
-          <div>
-            <label htmlFor="password" className="sr-only">
-              Парола
-            </label>
-            <div className="relative">
-              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Парола (минимум 6 символа)"
-                disabled={loading}
-                className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  errors.password
-                    ? "border-2 border-red-500"
-                    : "border border-gray-600"
-                }`}
-              />
-            </div>
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-400 flex items-center">
-                <span className="mr-1">⚠️</span>
-                {errors.password}
-              </p>
-            )}
-          </div>
+          <InputField
+            id="phone"
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            icon={FiPhone}
+            placeholder="Телефонен номер"
+            value={formData.phone}
+            onChange={handleChange}
+            error={errors.phone}
+            disabled={loading}
+          />
 
-          <div>
-            <label htmlFor="confirmPassword" className="sr-only">
-              Потвърдете паролата
-            </label>
-            <div className="relative">
-              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Потвърдете паролата"
-                disabled={loading}
-                className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
-                  errors.confirmPassword
-                    ? "border-2 border-red-500"
-                    : "border border-gray-600"
-                }`}
-              />
-            </div>
-            {errors.confirmPassword && (
-              <p className="mt-1 text-sm text-red-400 flex items-center">
-                <span className="mr-1">⚠️</span>
-                {errors.confirmPassword}
-              </p>
-            )}
-          </div>
+          <InputField
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="new-password"
+            icon={FiLock}
+            placeholder="Парола (минимум 6 символа)"
+            value={formData.password}
+            onChange={handleChange}
+            error={errors.password}
+            disabled={loading}
+          />
+
+          <InputField
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            autoComplete="new-password"
+            icon={FiLock}
+            placeholder="Потвърдете паролата"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            error={errors.confirmPassword}
+            disabled={loading}
+          />
 
           <button
             type="submit"
