@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { FiCalendar } from "react-icons/fi";
+import Button from "../ui/Button";
 
 const Hero = () => {
   const navigate = useNavigate();
@@ -22,13 +23,15 @@ const Hero = () => {
           Добре дошли в Barber Studio
         </h1>
 
-        <button
+        <Button
+          variant="primary"
+          size="xl"
+          icon={FiCalendar}
           onClick={handleBookingClick}
-          className="flex items-center space-x-2 px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xl font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          className="shadow-2xl hover:shadow-blue-500/25"
         >
-          <FiCalendar className="h-6 w-6" aria-hidden="true" />
-          <span>Резервирай час</span>
-        </button>
+          Резервирай час
+        </Button>
       </div>
     </div>
   );
