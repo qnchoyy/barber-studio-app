@@ -4,6 +4,7 @@ import { authAtom } from "../recoil/authAtom";
 import { FiUser, FiMail, FiPhone, FiSave, FiEdit2 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../api/axios";
+import InputField from "../components/ui/InputField";
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -200,94 +201,44 @@ export default function Profile() {
 
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-medium text-gray-300 mb-2"
-                >
-                  Пълно име
-                </label>
-                <div className="relative">
-                  <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={handleChange}
-                    disabled={!editing || loading}
-                    className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
-                      ${!editing ? "cursor-not-allowed opacity-75" : ""}
-                      ${
-                        errors.name
-                          ? "border-2 border-red-500"
-                          : "border border-gray-600"
-                      }`}
-                  />
-                </div>
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-400 flex items-center">
-                    <span className="mr-1">⚠️</span>
-                    {errors.name}
-                  </p>
-                )}
-              </div>
+              <InputField
+                id="name"
+                name="name"
+                type="text"
+                label="Пълно име"
+                icon={FiUser}
+                value={formData.name}
+                onChange={handleChange}
+                error={errors.name}
+                disabled={!editing || loading}
+              />
 
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-300 mb-2"
-                >
-                  Имейл адрес
-                </label>
-                <div className="relative">
-                  <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                  <input
-                    id="email"
-                    type="email"
-                    value={auth.user?.email || ""}
-                    disabled
-                    className="w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700/50 text-gray-400 border border-gray-600 cursor-not-allowed"
-                  />
-                </div>
-                <p className="mt-1 text-xs text-gray-500">
-                  Имейлът не може да бъде променен
-                </p>
-              </div>
+              <InputField
+                id="email"
+                type="email"
+                label="Имейл адрес"
+                icon={FiMail}
+                value={auth.user?.email || ""}
+                disabled={true}
+                className="opacity-75"
+              />
+              <p className="mt-1 text-xs text-gray-500">
+                Имейлът не може да бъде променен
+              </p>
 
-              <div>
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-300 mb-2"
-                >
-                  Телефонен номер
-                </label>
-                <div className="relative">
-                  <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                  <input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    disabled={!editing || loading}
-                    placeholder="Напр. 0888 123 456"
-                    className={`w-full pl-10 pr-3 py-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all
-                      ${!editing ? "cursor-not-allowed opacity-75" : ""}
-                      ${
-                        errors.phone
-                          ? "border-2 border-red-500"
-                          : "border border-gray-600"
-                      }`}
-                  />
-                </div>
-                {errors.phone && (
-                  <p className="mt-1 text-sm text-red-400 flex items-center">
-                    <span className="mr-1">⚠️</span>
-                    {errors.phone}
-                  </p>
-                )}
-              </div>
+              <InputField
+                id="phone"
+                name="phone"
+                type="tel"
+                label="Телефонен номер"
+                icon={FiPhone}
+                placeholder="Напр. 0888 123 456"
+                value={formData.phone}
+                onChange={handleChange}
+                error={errors.phone}
+                disabled={!editing || loading}
+              />
+
               {editing && (
                 <div className="flex items-center space-x-4 pt-4">
                   <button
