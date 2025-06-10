@@ -6,6 +6,7 @@ import { FiUser, FiLock, FiLogIn } from "react-icons/fi";
 import toast from "react-hot-toast";
 import api from "../api/axios";
 import InputField from "../components/ui/InputField";
+import Button from "../components/ui/Button";
 
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
@@ -44,7 +45,6 @@ export default function Login() {
     setLoading(true);
     const MIN_VISIBLE = 800;
     const start = Date.now();
-
     const loadingToast = toast.loading("🔄 Влизане…");
 
     try {
@@ -132,20 +132,16 @@ export default function Login() {
             disabled={loading}
           />
 
-          <button
+          <Button
             type="submit"
-            disabled={loading}
-            className={`w-full flex items-center justify-center py-3 px-4 rounded-lg text-white font-medium transition-all duration-200 ${
-              loading
-                ? "bg-blue-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg transform hover:-translate-y-0.5"
-            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            variant="primary"
+            size="large"
+            loading={loading}
+            icon={FiLogIn}
+            className="w-full"
           >
-            <FiLogIn
-              className={`mr-2 h-5 w-5 ${loading ? "animate-spin" : ""}`}
-            />
             {loading ? "Влизане…" : "Вход"}
-          </button>
+          </Button>
         </form>
 
         <div className="text-center text-s text-gray-500">
