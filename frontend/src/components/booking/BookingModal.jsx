@@ -14,6 +14,7 @@ import {
 import toast from "react-hot-toast";
 import api from "../../api/axios";
 import InputField from "../ui/InputField";
+import Button from "../ui/Button";
 
 const BookingModal = ({ isOpen, onClose, selectedService }) => {
   const auth = useRecoilValue(authAtom);
@@ -348,26 +349,27 @@ const BookingModal = ({ isOpen, onClose, selectedService }) => {
 
         <div className="sticky bottom-0 bg-gray-800 border-t border-gray-700 p-6 rounded-b-2xl z-10">
           <div className="flex items-center space-x-4">
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="medium"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+              className="flex-1"
             >
               Отказ
-            </button>
-            <button
+            </Button>
+
+            <Button
               type="button"
+              variant="primary"
+              size="medium"
+              icon={FiArrowRight}
               onClick={handleSubmit}
               disabled={!formData.date || !formData.time || loadingSlots}
-              className={`flex-2 flex items-center justify-center py-3 px-6 rounded-lg text-white font-semibold transition-all duration-300 ${
-                !formData.date || !formData.time || loadingSlots
-                  ? "bg-gray-600 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg"
-              }`}
+              className="flex-2"
             >
-              <FiArrowRight className="w-5 h-5 mr-3" />
               Прегледай резервацията
-            </button>
+            </Button>
           </div>
         </div>
       </div>
