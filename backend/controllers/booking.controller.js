@@ -431,87 +431,41 @@ export const cancelMyBooking = async (req, res) => {
     }
 };
 
-// ==================== ADMIN STATISTICS FUNCTIONS ====================
-
-// Общи статистики за админ dashboard
 export const getAdminStats = async (req, res) => {
     try {
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const startOfWeek = new Date(now);
+        const startOfWeek = new Date();
         startOfWeek.setDate(now.getDate() - now.getDay());
 
-        // Общо резервации
-        const totalBookings = await Booking.countDocuments();
-        const monthlyBookings = await Booking.countDocuments({
-            createdAt: { $gte: startOfMonth }
-        });
-        const weeklyBookings = await Booking.countDocuments({
-            createdAt: { $gte: startOfWeek }
-        });
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
 
-        // Общи приходи (само потвърдени и завършени)
-        const totalRevenueResult = await Booking.aggregate([
-            {
-                $lookup: {
-                    from: 'services',
-                    localField: 'serviceId',
-                    foreignField: '_id',
-                    as: 'service'
-                }
-            },
+        const totalRevenuePipeline = [
+            { $lookup: { from: 'services', localField: 'serviceId', foreignField: '_id', as: 'service' } },
             { $unwind: '$service' },
-            { $match: { status: { $in: ['потвърдена', 'завършена'] } } },
+            { $match: { status: 'завършена' } },
             { $group: { _id: null, total: { $sum: '$service.price' } } }
-        ]);
-        const totalRevenue = totalRevenueResult[0]?.total || 0;
+        ];
 
-        const monthlyRevenueResult = await Booking.aggregate([
-            {
-                $lookup: {
-                    from: 'services',
-                    localField: 'serviceId',
-                    foreignField: '_id',
-                    as: 'service'
-                }
-            },
+        const monthlyRevenuePipeline = [
+            { $lookup: { from: 'services', localField: 'serviceId', foreignField: '_id', as: 'service' } },
             { $unwind: '$service' },
             {
                 $match: {
-                    status: { $in: ['потвърдена', 'завършена'] },
+                    status: 'завършена',
                     createdAt: { $gte: startOfMonth }
                 }
             },
             { $group: { _id: null, total: { $sum: '$service.price' } } }
-        ]);
-        const monthlyRevenue = monthlyRevenueResult[0]?.total || 0;
+        ];
 
-        // Брой активни потребители (потребители с поне 1 резервация)
-        const activeUsers = await Booking.distinct('userId').then(users => users.length);
+        const statusStatsPipeline = [
+            { $group: { _id: '$status', count: { $sum: 1 } } }
+        ];
 
-        // Брой услуги
-        const totalServices = await Service.countDocuments();
-
-        // Статистики по статус
-        const statusStats = await Booking.aggregate([
-            {
-                $group: {
-                    _id: '$status',
-                    count: { $sum: 1 }
-                }
-            }
-        ]);
-
-        // Топ услуги по популярност
-        const topServices = await Booking.aggregate([
-            {
-                $lookup: {
-                    from: 'services',
-                    localField: 'serviceId',
-                    foreignField: '_id',
-                    as: 'service'
-                }
-            },
+        const topServicesPipeline = [
+            { $lookup: { from: 'services', localField: 'serviceId', foreignField: '_id', as: 'service' } },
             { $unwind: '$service' },
             {
                 $group: {
@@ -522,29 +476,47 @@ export const getAdminStats = async (req, res) => {
             },
             { $sort: { count: -1 } },
             { $limit: 5 }
+        ];
+
+        const bookingTrendsPipeline = [
+            { $match: { createdAt: { $gte: sevenDaysAgo } } },
+            {
+                $group: {
+                    _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { '_id': 1 } },
+            { $project: { date: '$_id', count: 1, _id: 0 } }
+        ];
+
+        const [
+            totalBookings,
+            monthlyBookings,
+            weeklyBookings,
+            totalRevenueResult,
+            monthlyRevenueResult,
+            activeUsersList,
+            totalServices,
+            statusStats,
+            topServices,
+            bookingTrends
+        ] = await Promise.all([
+            Booking.countDocuments(),
+            Booking.countDocuments({ createdAt: { $gte: startOfMonth } }),
+            Booking.countDocuments({ createdAt: { $gte: startOfWeek } }),
+            Booking.aggregate(totalRevenuePipeline),
+            Booking.aggregate(monthlyRevenuePipeline),
+            Booking.distinct('userId'),
+            Service.countDocuments(),
+            Booking.aggregate(statusStatsPipeline),
+            Booking.aggregate(topServicesPipeline),
+            Booking.aggregate(bookingTrendsPipeline)
         ]);
 
-        // Резервации по дни (последните 7 дни)
-        const last7Days = [];
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            date.setHours(0, 0, 0, 0);
-            const nextDate = new Date(date);
-            nextDate.setDate(nextDate.getDate() + 1);
-
-            const count = await Booking.countDocuments({
-                createdAt: {
-                    $gte: date,
-                    $lt: nextDate
-                }
-            });
-
-            last7Days.push({
-                date: date.toISOString().split('T')[0],
-                count
-            });
-        }
+        const totalRevenue = totalRevenueResult[0]?.total || 0;
+        const monthlyRevenue = monthlyRevenueResult[0]?.total || 0;
+        const activeUsers = activeUsersList.length;
 
         res.status(200).json({
             success: true,
@@ -560,10 +532,9 @@ export const getAdminStats = async (req, res) => {
                 },
                 statusStats,
                 topServices,
-                bookingTrends: last7Days
+                bookingTrends
             }
         });
-
     } catch (error) {
         console.error('Грешка при извличане на статистики:', error);
         res.status(500).json({
@@ -573,21 +544,28 @@ export const getAdminStats = async (req, res) => {
     }
 };
 
-// Последни резервации за dashboard
 export const getRecentBookings = async (req, res) => {
     try {
-        const limit = parseInt(req.query.limit) || 10;
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.min(100, parseInt(req.query.limit) || 10);
+        const skip = (page - 1) * limit;
+
+        const totalItems = await Booking.countDocuments();
 
         const recentBookings = await Booking.find()
-            .populate('userId', 'name email phone')
-            .populate('serviceId', 'name price duration')
+            .populate('user', 'name email phone')
             .sort({ createdAt: -1 })
+            .skip(skip)
             .limit(limit)
-            .select('userName date time status userId serviceId createdAt');
+            .select('serviceName date time status price user createdAt')
+            .lean();
+
+        const totalPages = Math.ceil(totalItems / limit);
 
         res.status(200).json({
             success: true,
-            data: recentBookings
+            data: recentBookings,
+            pagination: { currentPage: page, totalPages, totalItems, limit }
         });
 
     } catch (error) {
@@ -599,20 +577,33 @@ export const getRecentBookings = async (req, res) => {
     }
 };
 
-// Pending резервации (нови/неодобрени)
+
 export const getPendingBookings = async (req, res) => {
     try {
+        const page = Math.max(1, parseInt(req.query.page) || 1);
+        const limit = Math.min(100, parseInt(req.query.limit) || 10);
+        const skip = (page - 1) * limit;
+
+        const totalItems = await Booking.countDocuments({
+            status: { $in: ['нова', 'чакаща потвърждение'] }
+        });
+
         const pendingBookings = await Booking.find({
-            status: { $in: ['нова', 'чакаща потвърждение', 'потвърдена'] }
+            status: { $in: ['нова', 'чакаща потвърждение'] }
         })
-            .populate('userId', 'name email phone')
-            .populate('serviceId', 'name price duration')
+            .populate('user', 'name email phone')
             .sort({ createdAt: -1 })
-            .select('userName date time status userId serviceId createdAt');
+            .skip(skip)
+            .limit(limit)
+            .select('serviceName date time status price user createdAt')
+            .lean();
+
+        const totalPages = Math.ceil(totalItems / limit);
 
         res.status(200).json({
             success: true,
-            data: pendingBookings
+            data: pendingBookings,
+            pagination: { currentPage: page, totalPages, totalItems, limit }
         });
 
     } catch (error) {
@@ -624,7 +615,6 @@ export const getPendingBookings = async (req, res) => {
     }
 };
 
-// Месечни приходи за графика (последните 6 месеца)
 export const getMonthlyRevenue = async (req, res) => {
     try {
         const monthlyData = [];
@@ -650,7 +640,7 @@ export const getMonthlyRevenue = async (req, res) => {
                 { $unwind: '$service' },
                 {
                     $match: {
-                        status: { $in: ['потвърдена', 'завършена'] },
+                        status: 'завършена',
                         createdAt: { $gte: startOfMonth, $lte: endOfMonth }
                     }
                 },
@@ -662,7 +652,6 @@ export const getMonthlyRevenue = async (req, res) => {
                     }
                 }
             ]);
-
             const monthNames = [
                 'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Юни',
                 'Юли', 'Авг', 'Сеп', 'Окт', 'Ное', 'Дек'
