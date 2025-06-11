@@ -430,3 +430,261 @@ export const cancelMyBooking = async (req, res) => {
         });
     }
 };
+
+// ==================== ADMIN STATISTICS FUNCTIONS ====================
+
+// Общи статистики за админ dashboard
+export const getAdminStats = async (req, res) => {
+    try {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay());
+
+        // Общо резервации
+        const totalBookings = await Booking.countDocuments();
+        const monthlyBookings = await Booking.countDocuments({
+            createdAt: { $gte: startOfMonth }
+        });
+        const weeklyBookings = await Booking.countDocuments({
+            createdAt: { $gte: startOfWeek }
+        });
+
+        // Общи приходи (само потвърдени и завършени)
+        const totalRevenueResult = await Booking.aggregate([
+            {
+                $lookup: {
+                    from: 'services',
+                    localField: 'serviceId',
+                    foreignField: '_id',
+                    as: 'service'
+                }
+            },
+            { $unwind: '$service' },
+            { $match: { status: { $in: ['потвърдена', 'завършена'] } } },
+            { $group: { _id: null, total: { $sum: '$service.price' } } }
+        ]);
+        const totalRevenue = totalRevenueResult[0]?.total || 0;
+
+        const monthlyRevenueResult = await Booking.aggregate([
+            {
+                $lookup: {
+                    from: 'services',
+                    localField: 'serviceId',
+                    foreignField: '_id',
+                    as: 'service'
+                }
+            },
+            { $unwind: '$service' },
+            {
+                $match: {
+                    status: { $in: ['потвърдена', 'завършена'] },
+                    createdAt: { $gte: startOfMonth }
+                }
+            },
+            { $group: { _id: null, total: { $sum: '$service.price' } } }
+        ]);
+        const monthlyRevenue = monthlyRevenueResult[0]?.total || 0;
+
+        // Брой активни потребители (потребители с поне 1 резервация)
+        const activeUsers = await Booking.distinct('userId').then(users => users.length);
+
+        // Брой услуги
+        const totalServices = await Service.countDocuments();
+
+        // Статистики по статус
+        const statusStats = await Booking.aggregate([
+            {
+                $group: {
+                    _id: '$status',
+                    count: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Топ услуги по популярност
+        const topServices = await Booking.aggregate([
+            {
+                $lookup: {
+                    from: 'services',
+                    localField: 'serviceId',
+                    foreignField: '_id',
+                    as: 'service'
+                }
+            },
+            { $unwind: '$service' },
+            {
+                $group: {
+                    _id: '$service.name',
+                    count: { $sum: 1 },
+                    revenue: { $sum: '$service.price' }
+                }
+            },
+            { $sort: { count: -1 } },
+            { $limit: 5 }
+        ]);
+
+        // Резервации по дни (последните 7 дни)
+        const last7Days = [];
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            date.setHours(0, 0, 0, 0);
+            const nextDate = new Date(date);
+            nextDate.setDate(nextDate.getDate() + 1);
+
+            const count = await Booking.countDocuments({
+                createdAt: {
+                    $gte: date,
+                    $lt: nextDate
+                }
+            });
+
+            last7Days.push({
+                date: date.toISOString().split('T')[0],
+                count
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: {
+                overview: {
+                    totalBookings,
+                    monthlyBookings,
+                    weeklyBookings,
+                    totalRevenue,
+                    monthlyRevenue,
+                    activeUsers,
+                    totalServices
+                },
+                statusStats,
+                topServices,
+                bookingTrends: last7Days
+            }
+        });
+
+    } catch (error) {
+        console.error('Грешка при извличане на статистики:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Грешка при извличане на статистики'
+        });
+    }
+};
+
+// Последни резервации за dashboard
+export const getRecentBookings = async (req, res) => {
+    try {
+        const limit = parseInt(req.query.limit) || 10;
+
+        const recentBookings = await Booking.find()
+            .populate('userId', 'name email phone')
+            .populate('serviceId', 'name price duration')
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .select('userName date time status userId serviceId createdAt');
+
+        res.status(200).json({
+            success: true,
+            data: recentBookings
+        });
+
+    } catch (error) {
+        console.error('Грешка при извличане на последни резервации:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Грешка при извличане на резервации'
+        });
+    }
+};
+
+// Pending резервации (нови/неодобрени)
+export const getPendingBookings = async (req, res) => {
+    try {
+        const pendingBookings = await Booking.find({
+            status: { $in: ['нова', 'чакаща потвърждение', 'потвърдена'] }
+        })
+            .populate('userId', 'name email phone')
+            .populate('serviceId', 'name price duration')
+            .sort({ createdAt: -1 })
+            .select('userName date time status userId serviceId createdAt');
+
+        res.status(200).json({
+            success: true,
+            data: pendingBookings
+        });
+
+    } catch (error) {
+        console.error('Грешка при извличане на pending резервации:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Грешка при извличане на резервации'
+        });
+    }
+};
+
+// Месечни приходи за графика (последните 6 месеца)
+export const getMonthlyRevenue = async (req, res) => {
+    try {
+        const monthlyData = [];
+
+        for (let i = 5; i >= 0; i--) {
+            const date = new Date();
+            date.setMonth(date.getMonth() - i);
+            const year = date.getFullYear();
+            const month = date.getMonth();
+
+            const startOfMonth = new Date(year, month, 1);
+            const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
+
+            const revenueResult = await Booking.aggregate([
+                {
+                    $lookup: {
+                        from: 'services',
+                        localField: 'serviceId',
+                        foreignField: '_id',
+                        as: 'service'
+                    }
+                },
+                { $unwind: '$service' },
+                {
+                    $match: {
+                        status: { $in: ['потвърдена', 'завършена'] },
+                        createdAt: { $gte: startOfMonth, $lte: endOfMonth }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        revenue: { $sum: '$service.price' },
+                        count: { $sum: 1 }
+                    }
+                }
+            ]);
+
+            const monthNames = [
+                'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Юни',
+                'Юли', 'Авг', 'Сеп', 'Окт', 'Ное', 'Дек'
+            ];
+
+            monthlyData.push({
+                month: monthNames[month],
+                revenue: revenueResult[0]?.revenue || 0,
+                bookings: revenueResult[0]?.count || 0
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: monthlyData
+        });
+
+    } catch (error) {
+        console.error('Грешка при извличане на месечни приходи:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Грешка при извличане на данни'
+        });
+    }
+};
