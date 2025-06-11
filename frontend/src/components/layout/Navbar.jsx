@@ -4,6 +4,7 @@ import { useRecoilState } from "recoil";
 import { authAtom } from "../../recoil/authAtom";
 import { FiUser } from "react-icons/fi";
 import { HiOutlineMenuAlt3, HiX, HiChevronDown } from "react-icons/hi";
+import Button from "../ui/Button";
 
 const NavItem = ({ to, label, onClick, mobile = false }) => {
   const base = mobile
@@ -81,20 +82,23 @@ const Navbar = () => {
             </>
           ) : (
             <li className="relative">
-              <button
+              <Button
+                variant="ghost"
+                size="medium"
+                icon={HiChevronDown}
+                iconPosition="right"
                 onClick={() => setUserMenuOpen((u) => !u)}
-                className="flex items-center space-x-1 text-white"
+                className="text-white"
               >
-                <span>Здравей, {auth.user.name.split(" ")[0]}</span>
-                <HiChevronDown className="w-4 h-4 text-gray-300" />
-              </button>
+                Здравей, {auth.user.name.split(" ")[0]}
+              </Button>
 
               {userMenuOpen && (
-                <ul className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2">
+                <ul className="absolute -right-6 mt-2 w-52 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-2xl py-2 border border-gray-700/50 backdrop-blur-lg">
                   <li>
                     <Link
                       to="/bookings"
-                      className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      className="block px-4 py-2 text-gray-300 hover:bg-blue-500/20 hover:text-blue-400 transition-all duration-200 rounded-lg mx-2"
                     >
                       Моите резервации
                     </Link>
@@ -102,7 +106,7 @@ const Navbar = () => {
                   <li>
                     <Link
                       to="/profile"
-                      className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      className="block px-4 py-2 text-gray-300 hover:bg-blue-500/20 hover:text-blue-400 transition-all duration-200 rounded-lg mx-2"
                     >
                       Профил
                     </Link>
@@ -111,16 +115,16 @@ const Navbar = () => {
                     <li>
                       <Link
                         to="/admin"
-                        className="block px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                        className="block px-4 py-2 text-gray-300 hover:bg-purple-500/20 hover:text-purple-400 transition-all duration-200 rounded-lg mx-2"
                       >
                         Админ панел
                       </Link>
                     </li>
                   )}
-                  <li>
+                  <li className="border-t border-gray-700/50 mt-2 pt-2 mx-2">
                     <button
                       onClick={logout}
-                      className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                      className="block w-full text-left px-4 py-2 text-gray-300 hover:bg-red-500/20 hover:text-red-400 transition-all duration-200 rounded-lg"
                     >
                       Изход
                     </button>
@@ -131,16 +135,13 @@ const Navbar = () => {
           )}
         </ul>
 
-        <button
+        <Button
+          variant="ghost"
+          size="medium"
+          icon={!isOpen ? HiOutlineMenuAlt3 : HiX}
           onClick={() => setIsOpen((o) => !o)}
-          className="md:hidden p-2 text-gray-400 hover:text-white"
-        >
-          {!isOpen ? (
-            <HiOutlineMenuAlt3 className="h-6 w-6" />
-          ) : (
-            <HiX className="h-6 w-6" />
-          )}
-        </button>
+          className="md:hidden text-gray-400 hover:text-white [&_svg]:!w-6 [&_svg]:!h-6"
+        />
       </div>
 
       {isOpen && (
@@ -213,15 +214,17 @@ const Navbar = () => {
                   </li>
                 )}
                 <li>
-                  <button
+                  <Button
+                    variant="outline"
+                    size="medium"
                     onClick={() => {
                       logout();
                       setIsOpen(false);
                     }}
-                    className="block w-full text-left px-3 py-2 text-gray-300 hover:bg-gray-700"
+                    className="w-full text-left text-gray-300 border-gray-600 hover:bg-gray-700 hover:border-gray-500"
                   >
                     Изход
-                  </button>
+                  </Button>
                 </li>
               </>
             )}
