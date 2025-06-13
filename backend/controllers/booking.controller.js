@@ -7,6 +7,7 @@ import Service from '../models/Service.model.js';
 
 import { sendSMS } from '../utils/sendSMS.js';
 import { formatToE164, validateBulgarianPhone } from '../utils/phoneUtils.js';
+import Notification from '../models/Notification.model.js';
 
 export const createBooking = async (req, res) => {
     const session = await mongoose.startSession();
@@ -90,6 +91,13 @@ export const createBooking = async (req, res) => {
         if (!result.success) {
             console.error('SMS error:', result.error);
         }
+
+        await Notification.create({
+            type: 'резервация',
+            title: 'Нова резервация',
+            message: `${userName} направи резервация за ${service.name} на ${date} в ${time}`,
+            relatedBookingId: booking._id
+        });
 
         return res.status(201).json({ success: true, message: 'Booking created successfully.', data: booking });
     } catch (error) {
@@ -407,6 +415,13 @@ export const cancelMyBooking = async (req, res) => {
 
         booking.status = 'отменена';
         await booking.save();
+
+        await Notification.create({
+            type: 'отмяна',
+            title: 'Отменена резервация',
+            message: `${booking.userName} отмени резервацията си за ${booking.time} на ${booking.date.toLocaleDateString('bg-BG')}`,
+            relatedBookingId: booking._id
+        });
 
         const cancelSMS = `Здравей, ${booking.userName}! Вашата резервация за ${booking.date.toLocaleDateString('bg-BG')} в ${booking.time} е отменена успешно.`;
 
