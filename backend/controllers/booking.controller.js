@@ -553,11 +553,12 @@ export const getRecentBookings = async (req, res) => {
         const totalItems = await Booking.countDocuments();
 
         const recentBookings = await Booking.find()
-            .populate('user', 'name email phone')
+            .populate('userId', 'name email phone')
+            .populate('serviceId', 'name price duration')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .select('serviceName date time status price user createdAt')
+            .select('userName phone date time status userId serviceId createdAt')
             .lean();
 
         const totalPages = Math.ceil(totalItems / limit);
@@ -577,7 +578,6 @@ export const getRecentBookings = async (req, res) => {
     }
 };
 
-
 export const getPendingBookings = async (req, res) => {
     try {
         const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -585,17 +585,18 @@ export const getPendingBookings = async (req, res) => {
         const skip = (page - 1) * limit;
 
         const totalItems = await Booking.countDocuments({
-            status: { $in: ['нова', 'чакаща потвърждение'] }
+            status: 'потвърдена'
         });
 
         const pendingBookings = await Booking.find({
-            status: { $in: ['нова', 'чакаща потвърждение'] }
+            status: 'потвърдена'
         })
-            .populate('user', 'name email phone')
+            .populate('userId', 'name email phone')
+            .populate('serviceId', 'name price duration')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .select('serviceName date time status price user createdAt')
+            .select('userName phone date time status userId serviceId createdAt')
             .lean();
 
         const totalPages = Math.ceil(totalItems / limit);
