@@ -573,7 +573,7 @@ export const getRecentBookings = async (req, res) => {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .select('userName phone date time status userId serviceId createdAt')
+            .select('userName phone date time status userId serviceId createdAt updatedAt')
             .lean();
 
         const totalPages = Math.ceil(totalItems / limit);
