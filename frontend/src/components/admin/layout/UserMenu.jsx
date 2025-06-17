@@ -3,7 +3,6 @@ import { useSetRecoilState } from "recoil";
 import { authAtom } from "../../../recoil/authAtom";
 import { FiUser, FiSettings, FiLogOut, FiChevronDown } from "react-icons/fi";
 import AdminDropdown from "../ui/AdminDropdown";
-import AdminButton from "../ui/AdminButton";
 
 const UserMenu = ({ user }) => {
   const navigate = useNavigate();
