@@ -94,7 +94,7 @@ const AdminDropdown = ({
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-[9998] lg:hidden"
+          className="fixed inset-0 z-20 lg:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
