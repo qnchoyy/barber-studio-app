@@ -119,7 +119,7 @@ export default function AdminTable({
       )}
 
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full">
+        <table className="min-w-full table-auto">
           <thead>
             <tr className="border-b border-white/10">
               {columns.map((column, index) => (
@@ -148,7 +148,7 @@ export default function AdminTable({
                   className="hover:bg-white/5 transition-colors group"
                 >
                   {columns.map((column, colIndex) => (
-                    <td key={colIndex} className="px-6 py-4 whitespace-nowrap">
+                    <td key={colIndex} className="px-6 py-4 whitespace-normal">
                       {column.cell ? (
                         column.cell(row)
                       ) : (
