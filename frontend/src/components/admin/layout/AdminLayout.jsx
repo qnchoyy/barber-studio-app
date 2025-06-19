@@ -6,7 +6,7 @@ import { authAtom } from "../../../recoil/authAtom";
 import AdminHeader from "./AdminHeader";
 import AdminSidebar from "./AdminSidebar";
 
-const AdminLayout = ({ children }) => {
+const AdminLayout = ({ children, hideHeader = false }) => {
   const auth = useRecoilValue(authAtom);
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,10 +48,12 @@ const AdminLayout = ({ children }) => {
         />
 
         <div className="flex-1 flex flex-col overflow-hidden relative z-10">
-          <AdminHeader
-            onMenuClick={() => setSidebarOpen(true)}
-            user={auth.user}
-          />
+          {!hideHeader && (
+            <AdminHeader
+              onMenuClick={() => setSidebarOpen(true)}
+              user={auth.user}
+            />
+          )}
 
           <main className="flex-1 overflow-y-auto relative z-0">
             <div className="p-6">{children}</div>
