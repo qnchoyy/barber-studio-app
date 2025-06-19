@@ -117,9 +117,29 @@ export const getAllBookings = async (req, res) => {
         const statusFilter = req.query.status;
         const sortOrder = req.query.sort === 'asc' ? 1 : -1;
 
+        const startDate = req.query.startDate;
+        const endDate = req.query.endDate;
+
         const query = {};
+
         if (statusFilter) {
             query.status = statusFilter;
+        }
+
+        if (startDate || endDate) {
+            query.date = {};
+
+            if (startDate) {
+                const start = new Date(startDate);
+                start.setHours(0, 0, 0, 0);
+                query.date.$gte = start;
+            }
+
+            if (endDate) {
+                const end = new Date(endDate);
+                end.setHours(23, 59, 59, 999);
+                query.date.$lte = end;
+            }
         }
 
         const total = await Booking.countDocuments(query);
