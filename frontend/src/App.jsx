@@ -14,6 +14,7 @@ import MyBookings from "./pages/MyBookings";
 // Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminServices from "./pages/admin/AdminServices";
+import AdminBookings from "./pages/admin/AdminBookings";
 
 function App() {
   return (
@@ -95,6 +96,7 @@ function App() {
         />
 
         <Route path="/admin/services" element={<AdminServices />} />
+        <Route path="/admin/bookings" element={<AdminBookings />} />
       </Routes>
     </>
   );
