@@ -15,6 +15,7 @@ import MyBookings from "./pages/MyBookings";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminServices from "./pages/admin/AdminServices";
 import AdminBookings from "./pages/admin/AdminBookings";
+import AdminSchedule from "./pages/admin/AdminSchedule";
 
 function App() {
   return (
@@ -97,6 +98,7 @@ function App() {
 
         <Route path="/admin/services" element={<AdminServices />} />
         <Route path="/admin/bookings" element={<AdminBookings />} />
+        <Route path="/admin/schedule" element={<AdminSchedule />} />
       </Routes>
     </>
   );
