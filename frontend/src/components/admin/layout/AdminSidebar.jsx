@@ -41,7 +41,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
     },
     {
       name: "Статистики",
-      href: "/admin/analytics",
+      href: "/admin/statistics",
       icon: FiBarChart,
       description: "Анализи и отчети",
     },
