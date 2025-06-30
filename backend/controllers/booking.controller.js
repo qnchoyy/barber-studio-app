@@ -653,16 +653,18 @@ export const getPendingBookings = async (req, res) => {
 
 export const getMonthlyRevenue = async (req, res) => {
     try {
+        const { year } = req.query;
+        const targetYear = year ? parseInt(year) : new Date().getFullYear();
+
         const monthlyData = [];
+        const monthNames = [
+            'Янр', 'Фев', 'Мар', 'Апр', 'Май', 'Юни',
+            'Юли', 'Авг', 'Сеп', 'Окт', 'Ное', 'Дек'
+        ];
 
-        for (let i = 5; i >= 0; i--) {
-            const date = new Date();
-            date.setMonth(date.getMonth() - i);
-            const year = date.getFullYear();
-            const month = date.getMonth();
-
-            const startOfMonth = new Date(year, month, 1);
-            const endOfMonth = new Date(year, month + 1, 0, 23, 59, 59);
+        for (let month = 0; month < 12; month++) {
+            const startOfMonth = new Date(targetYear, month, 1);
+            const endOfMonth = new Date(targetYear, month + 1, 0, 23, 59, 59);
 
             const revenueResult = await Booking.aggregate([
                 {
@@ -684,19 +686,15 @@ export const getMonthlyRevenue = async (req, res) => {
                     $group: {
                         _id: null,
                         revenue: { $sum: '$service.price' },
-                        count: { $sum: 1 }
+                        bookings: { $sum: 1 }
                     }
                 }
             ]);
-            const monthNames = [
-                'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Юни',
-                'Юли', 'Авг', 'Сеп', 'Окт', 'Ное', 'Дек'
-            ];
 
             monthlyData.push({
                 month: monthNames[month],
                 revenue: revenueResult[0]?.revenue || 0,
-                bookings: revenueResult[0]?.count || 0
+                bookings: revenueResult[0]?.bookings || 0
             });
         }
 
