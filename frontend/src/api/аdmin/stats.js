@@ -21,8 +21,8 @@ export const statsAPI = {
         return response.data;
     },
 
-    getMonthlyRevenue: async () => {
-        const response = await api.get('/api/bookings/admin/monthly-revenue');
+    getMonthlyRevenue: async (year = new Date().getFullYear()) => {
+        const response = await api.get(`/api/bookings/admin/monthly-revenue?year=${year}`);
         return response.data;
     },
 };
