@@ -17,7 +17,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminServices from "./pages/admin/AdminServices";
 import AdminBookings from "./pages/admin/AdminBookings";
 import AdminSchedule from "./pages/admin/AdminSchedule";
-// import AdminStats from "./pages/admin/AdminStats";
+import AdminStats from "./pages/admin/AdminStats";
 
 function App() {
   useTokenValidation();
@@ -103,7 +103,7 @@ function App() {
         <Route path="/admin/services" element={<AdminServices />} />
         <Route path="/admin/bookings" element={<AdminBookings />} />
         <Route path="/admin/schedule" element={<AdminSchedule />} />
-        {/* <Route path="/admin/statistics" element={<AdminStats />} /> */}
+        <Route path="/admin/statistics" element={<AdminStats />} />
       </Routes>
     </>
   );
