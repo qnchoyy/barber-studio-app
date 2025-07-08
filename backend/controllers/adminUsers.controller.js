@@ -19,7 +19,7 @@ export const getAllUsers = async (req, res) => {
             const regex = new RegExp(search.trim(), 'i');
             query.$or = [
                 { name: regex },
-                { emai: regex },
+                { email: regex },
                 { phone: regex }
             ];
         }
