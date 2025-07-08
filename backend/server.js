@@ -15,6 +15,7 @@ import authRouter from './routes/auth.routes.js';
 import scheduleRouter from './routes/schedule.routes.js';
 import userRouter from './routes/user.routes.js';
 import NotificationRouter from './routes/notification.routes.js';
+import adminUsersRouter from './routes/adminUsers.routes.js';
 
 const app = express();
 
@@ -52,6 +53,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/schedule', scheduleRouter);
 app.use('/api/user', userRouter);
 app.use('/api/admin/notifications', NotificationRouter);
+app.use('/api/admin/users', adminUsersRouter);
 
 app.listen(PORT, () => {
     console.log(`✅ Server running at http://localhost:${PORT}`);
